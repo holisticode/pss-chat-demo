@@ -1,0 +1,109 @@
+body {
+  padding: 0;
+  margin: 0;
+  background-color: #303030;
+  color: #f69047;
+}
+
+#app {
+  min-width: 100%;
+  min-height: 100%;
+  overflow: hidden;
+}
+
+.demo-setup {
+  width: 75%;
+  margin: 0 auto;
+}
+
+.demo-setup h1 {
+  text-align: center;
+  margin-bottom: 15%;
+}
+
+.demo-config {
+  font-size: 1.2em;
+  line-height: 1.2em;
+  border: 1px solid #f69047;
+  padding: 10px;
+  width: 1200px;
+  margin: 0 auto;
+}
+
+.enc-config-option {
+  margin: 10px 0;
+}
+
+.enc-config-label
+{
+  width: 250px;
+  display: inline-block;
+  font-weight: bold;
+  text-align: right;
+  margin-right: 20px;
+}
+
+.enc-config-value {
+  display: inline-block;
+}
+
+.small {
+  font-size: 14px;
+}
+
+input {
+  border: 1px solid #f69047;
+  padding: 10px;
+  background-color: transparent;
+  color: #f69047;
+}
+
+button {
+  color: #303030;
+  background-color: #f69047;
+  padding: 12px;
+  border: 1px solid #f69047;
+  font-weight: bold;
+}
+
+.action {
+  width: 160px;
+}
+
+.inline {
+  display: inline-block;
+}
+
+.title {
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+#username {
+  margin-top: 50px;
+  margin-right: 20px;
+  font-weight: bold;
+}
+
+label.hide-checkbox input {
+  display: none;/* <-- hide the default checkbox */
+}
+label.hide-checkbox span {/* <-- style the artificial checkbox */
+  height: 20px;
+  width: 20px;
+  border: 1px solid #f69047;
+  display: inline-block;
+  position: relative;
+  background-color: #303030;
+  vertical-align:middle;
+  margin-left: 6px;
+}
+
+[type=checkbox]:checked + span:before {/* <-- style its checked state..with a ticked icon */
+  content: '\2714';
+  position: absolute;
+  left: 2px;
+  line-height: 20px;
+  font-size: 20px;
+}
+

@@ -2,12 +2,16 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>Whisper Chat example app</title>
+    <title>Pss Chat Demo-app</title>
+    <link rel="stylesheet" href="css/pss-chat-demo.css">
+
   </head>
   <body>
     <div id="app">
-        <whisper-chat></whisper-chat>
+      <router-link to="/pss-setup">Pss chat setup</router-link>
+      <router-link to="/pss-chat">Pss chat</router-link>
+      <router-view></router-view>
     </div>
-    <script src="/dist/whisper-chat-example.js"></script>
+    <script src="/dist/pss-chat-demo.js"></script>
   </body>
 </html>

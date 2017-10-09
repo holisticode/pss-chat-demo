@@ -1,7 +1,19 @@
 <template>
-	<div>
-		Key generation password: <input v-model="sympw" @input="updateKey" /><br>
-		Symmetric key ID: {{symKeyId || "Type a password to start generating the key"}}
+	<div class="enc-config-option">
+    <div class="enc-config-label">
+		  Generate Symmetric Key: 
+    </div>
+    <div class="enc-config-value">
+			<button class="action" @click="updateKey">Generate</button>
+    </div>
+    <br/>
+    <br/>
+    <div class="enc-config-label">
+		  Symmetric key ID:
+    </div>
+    <div class="enc-config-value">
+      {{symKeyId || "Click button above to generate the key"}}
+    </div>
 	</div>
 </template>
 

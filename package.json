@@ -1,15 +1,16 @@
 {
-  "name": "whisper-chat-example",
-  "version": "1.0.0",
-  "description": "This example demonstrates how to build a whisper(v5)-based chat.",
+  "name": "pss-chat-example",
+  "version": "0.1.0",
+  "description": "This example demonstrates how to build a pss-based chat.",
   "main": "index.js",
   "scripts": {
     "dev": "cross-env NODE_ENV=development webpack-dev-server --hot"
   },
-  "author": "Guillaume Ballet",
+  "author": ["Guillaume Ballet","Fabio Barone"],
   "license": "Unlicense",
   "dependencies": {
     "vue": "^2.4.2",
+    "vue-router": "^2.7.0",
     "web3": "^1.0.0-beta.18"
   },
   "devDependencies": {

@@ -1,7 +1,23 @@
 <template>
-	<div>
-		Asymetric key id: {{keyId}}<br>
-		Public key: {{pubKey}}
+	<div class="enc-config-option">
+    <div class="enc-config-label">
+		  Your Swarm overlay address: 
+    </div>
+    <div class="enc-config-value">
+			<p v-if="keyId">
+        {{keyId}}
+      </p>
+			<p v-else>
+        Invalid. Are you connected to a PSS node?
+      </p>
+    </div>
+    <br/>
+    <div class="enc-config-label">
+      Public key: 
+    </div>
+    <div class="enc-config-value small">
+		  {{pubKey}}
+    </div>
 	</div>
 </template>
 
