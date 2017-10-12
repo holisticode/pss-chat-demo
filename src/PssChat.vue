@@ -26,8 +26,8 @@
 		      <div class="topic-selection">
 			      <label> Selected Topic:</label>
             <select class="topic-selector" id="pss_topic_send">
-             <option value="t" v-for="t in topics">
-                {{t}}
+             <option :value="t.value" v-for="t in topics">
+                {{t.label}}
              </option>
             </select>
 		      </div>
@@ -38,7 +38,7 @@
 	      </div>
         <div class="chat-messages">
           <div class="pss-message" v-for="msg in messages">
-            <div v-bind:class="{'msg-recv': msg.recv }" class="msg">{{msg.text}}</div>
+            <div v-bind:class="{'msg-recv': msg.recv, 'msg-remote': msg.remote }" class="msg">{{msg.text}}</div>
           </div> 
         </div>
 
@@ -53,7 +53,9 @@
       <label class="full dialog-elem" v-if="asym">Enter the peer's public key</label>
       <label class="full dialog-elem" v-else>Enter the symmetric key for your peer's connection</label>
       <input class="full dialog-elem" type="text" v-model="remoteKey" />
-      <button class="action" @click="doAddPeer">Add</button>
+      <label class="full dialog-elem">Enter the peer's overlay address</label>
+      <input class="full dialog-elem" type="text" v-model="remoteAddr" />
+      <button class="action" v-if="remoteKey && remoteAddr" @click="registerPeer">Add</button>
       <button class="cancel" @click="cancel">Cancel</button>
     </div>
 	</div>
@@ -62,6 +64,7 @@
 <script>
 import PssService from './PssService';
 import {decodeFromHex, encodeToHex, string2Bin} from './hexutils';
+import Base64 from './base64js.min';
 
 const defaultRecipientPubKey = "0x04ffb2647c10767095de83d45c7c0f780e483fb2221a1431cb97a5c61becd3c22938abfe83dd6706fc1154485b80bc8fcd94aea61bf19dd3206f37d55191b9a9c4";
 const defaultTopic = "0x5a4ea131";
@@ -86,9 +89,10 @@ export default {
       channels: [],
       selectedChannel: false,
       remoteKey: "",
+      remoteAddr: "",
       addingPeer: false,
       newTopic: "",
-      topics: ["None"],
+      topics: [{label:"None", value:""}],
       peers: [],
       messages: [],
       newMsg: ""
@@ -101,12 +105,24 @@ export default {
 
   created: function() {
     var self = this;
+    this.$root.$on("pss_stringToTopic_received", function(result) {
+      let topic = result;
+      console.log(topic);
+      self.topics.unshift({label: decodeFromHex(topic), value: topic});
+      self.subscribeTopic(topic);
+    });
     this.$root.$on("pss_subscribe_received", function(result) {
       let newt = result;
-      self.topics.unshift(newt);
+      console.log(newt);
     });
     this.$root.$on("msg_send_confirmed", function(result) {
       self.setMessageRead(result);
+    });
+    this.$root.$on("pss_setPeerPublicKey_received", function(result) {
+      self.doAddPeer(result);
+    });
+    this.$root.$on("pss_message_received", function(result) {
+      self.messageReceived(result);
     });
   },
 
@@ -114,11 +130,25 @@ export default {
 
     setMessageRead(result) {
       let id = parseInt(result);
-      for (let i=0; i<self.messages.length; i++) {
-        if (self.messages[i].id == id) {
-          self.messages[id].recv = true;
+      for (let i=0; i<this.messages.length; i++) {
+        if (this.messages[i].id == id) {
+          this.messages[id].recv = true;
         }
       }
+    },
+
+    messageReceived(msg) {
+      let decoded = new Buffer(msg, "base64").toString();
+      
+			let displaymsg = {
+        id: cnt,
+				text: decoded,
+				name: "Other",
+        recv : true,
+        remote: true
+			};
+
+			this.messages.push(displaymsg);
     },
 
 		addPeer() {
@@ -129,12 +159,20 @@ export default {
       return channel.substring(0,8) + "...";
     },
 
-    doAddPeer() {
+    registerPeer() {
       if (!this.remoteKey) {
         alert("Please enter a valid peer key!")
         return;
       }
-      this.channels.push(this.remoteKey);
+      if (!this.remoteAddr) {
+        alert("Please enter a valid peer address!")
+        return;
+      }
+      PssService.send("pss_setPeerPublicKey","pss_setPeerPublicKey",'[[' + Base64.toByteArray(new Buffer(this.remoteKey, "hex").toString('base64')) + '],"' + this.topics[0].value + '",[' + Base64.toByteArray(new Buffer(this.remoteAddr, "hex").toString('base64')) + ']]');
+    },
+
+    doAddPeer() {
+      this.channels.push(this.remoteAddr);
       if (this.channels.length == 1) {
         this.selectChannel(this.channels[0]);
       }       
@@ -161,15 +199,19 @@ export default {
         alert("Please enter a valid topic!");
         return
       }
-      this.subscribeTopic(this.newTopic);
+      this.stringToTopic(this.newTopic);
     },
 
     selectChannel(ch) {
       this.selectedChannel = ch;
     },
 
+    stringToTopic(topic) {
+      PssService.send("pss_stringToTopic","pss_stringToTopic", '["' + topic + '"]');
+    },
+
     subscribeTopic(topic) {
-      PssService.send("pss_subscribe","pss_stringToTopic", '["' + topic + '"]');
+      PssService.send("pss_subscribe","pss_subscribe", '["receive","' + topic + '"]');
     },
 
 		sendMessage(newMsg) {
@@ -177,14 +219,15 @@ export default {
         id: cnt,
 				text: newMsg,
 				name: "Me",
-        recv : false
+        recv : false,
+        remote: false
 			};
 			this.messages.push(msg);
 
 			if (this.asym) {
-        PssService.send("pss_sendAsym" + cnt++, "pss_sendAsym", '["' + encodeToHex(this.selectedChannel) + '","' + this.topics[0] + '",[' + string2Bin(msg.text) + ']]');
+        PssService.send("pss_sendAsym" + cnt++, "pss_sendAsym", '["0x' + this.remoteKey + '","' + this.topics[0].value + '",[' + string2Bin(msg.text) + ']]');
 			} else {
-        PssService.send("pss_sendSym" + cnt++, "pss_sendSym", '["' + encodeToHex(this.selectedChannel) + '","' + this.topics[0] + '",[' + string2Bin(msg.text) + ']]');
+        PssService.send("pss_sendSym" + cnt++, "pss_sendSym", '["0x' + this.selectedChannel + '","' + this.topics[0].value + '",[' + string2Bin(msg.text) + ']]');
       }
 		}
 	}

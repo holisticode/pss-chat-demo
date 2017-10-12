@@ -11,13 +11,17 @@ export function decodeFromHex(hex) {
 			let n = parseInt(hex.slice(i, i+2), 16);
 			result += String.fromCharCode(n);
 		}
+    return result;
+	}
+}
 
+export function decodeJSONFromHex(hex) {
+  let result = decodeFromHex(hex);
 		try {
-			return JSON.parse(result);
+			return JSON.parse(result);;
 		} catch (e) {
 			return "Error: message could not be decrypted";
 		}
-	}
 }
 
 export function encodeToHex(string) {

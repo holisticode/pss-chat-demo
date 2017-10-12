@@ -42,6 +42,13 @@ const app = new Vue({
 
 PssService.ws.onmessage =  function(m) {
   var msg = JSON.parse(m.data);
+
+  if (msg.method == "pss_subscription") {
+    let msgtext = msg.params.result.Msg;
+    app.$emit("pss_message_received", msgtext);
+    return;
+  }
+
   if (msg.id.indexOf("pss_sendAsym") == 0) {
     let id = msg.id.substr("pss_sendAsym".length);
     app.$emit("msg_send_confirmed", id);
@@ -54,8 +61,13 @@ PssService.ws.onmessage =  function(m) {
     return;
   }
 
+
   switch(msg.id) {
       // result for address request
+      case "pss_stringToTopic":	
+        console.log("emit pss_stringToTopic_received");
+        app.$emit("pss_stringToTopic_received", msg.result);
+        break;
       case "pss_baseAddr":	
         console.log("emit pss_baseAddr_received");
         app.$emit("pss_baseAddr_received", msg.result);
@@ -64,6 +76,10 @@ PssService.ws.onmessage =  function(m) {
       case "pss_getPublicKey":
         console.log("emit pss_getPublicKey_received");
         app.$emit("pss_getPublicKey_received", msg.result);
+        break;
+      case "pss_setPeerPublicKey":
+        console.log("emit pss_setPeerPublicKey_received");
+        app.$emit("pss_setPeerPublicKey_received", msg.result);
         break;
       case "pss_subscribe":
         console.log("emit pss_subscribe_received");

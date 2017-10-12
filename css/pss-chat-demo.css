@@ -3,6 +3,121 @@ body {
   margin: 0;
   background-color: #303030;
   color: #f69047;
+  font-family: arial;
+}
+
+header {
+  min-width:100%;
+  height: 50px;
+  background-color: rgba(246, 144, 71, 0.8);
+  position: fixed;
+  top: 0;
+}
+
+.page-title {
+  width: 50%;
+  margin: auto;
+  text-align: center;
+  color: white;
+  vertical-align: middle;
+  line-height: 50px;
+  font-size: 28px;
+}
+
+.chat-wrapper {
+  min-width: 100%;
+  display: flex;
+  position: fixed;
+  top: 50px;
+  min-height: 100vh;
+}
+
+.chat-channels {
+  width: 20vw;
+  padding: 20px;
+  border-right: 1px solid #f69047;
+  box-shadow: 0px 0px 3px #f69047;
+  display: flex;
+  flex-flow: column;
+  height: 90vh;
+}
+
+.channel-list {
+  flex: 1;
+}
+
+.add-peer-dialog {
+  position: absolute;
+  z-index: 100;
+  padding: 50px;
+  background-color: #111;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 75vw;
+}
+
+.add-peer-dialog input {
+  box-sizing: border-box;
+}
+
+.full {
+  width: 100%;
+}
+
+.dialog-elem {
+  margin: 16px 0;
+}
+
+.channel-title {
+  text-align: center;
+  font-size: 1.2em;
+  font-weight: bold;
+}
+
+#add-peer-btn {
+  left: 50%;
+  transform: translateX(-50%);
+  position: relative;
+}
+
+.add-peer-section {
+  bottom: 0;
+}
+
+.chat-window {
+  width: 80vw;
+}
+
+.topic-section {
+  width: 100%;
+  margin-top: 20px;
+  text-align: center;
+}
+
+.topic-selection {
+  display: inline-block;
+  margin-right: 100px;
+}
+
+.set-topic {
+  display: inline-block;
+}
+
+.my-message {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  padding: 20px;
+  border-top: 1px solid;
+}
+
+.type-message {
+  width: 75vw;
+}
+
+.channel-list {
+  list-style-type: none;
 }
 
 #app {
@@ -48,7 +163,16 @@ body {
 }
 
 .small {
-  font-size: 14px;
+  font-size: 12px;
+}
+
+select {
+  border: 1px solid #f69047;
+  background-color: transparent;
+  padding: 3px 10px;
+  color: #f69047;
+  padding: 9px;
+  width: 200px;
 }
 
 input {
@@ -64,10 +188,17 @@ button {
   padding: 12px;
   border: 1px solid #f69047;
   font-weight: bold;
+  cursor: pointer;
 }
 
 .action {
   width: 160px;
+}
+
+button.cancel {
+  color: #f69047;
+  background-color: transparent;
+  float: right;
 }
 
 .inline {
@@ -107,3 +238,27 @@ label.hide-checkbox span {/* <-- style the artificial checkbox */
   font-size: 20px;
 }
 
+.chat-messages {
+  padding: 20px 100px 20px 20px;
+}
+
+.pss-message {
+  text-align: right;
+  margin-bottom: 6px;
+}
+
+.msg {
+  padding: 6px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  opacity: 0.6;
+}
+
+.msg-recv {
+  opacity: 1 !important;
+}
+
+.msg-remote {
+  color: white;
+  background-color: #f69047;
+}

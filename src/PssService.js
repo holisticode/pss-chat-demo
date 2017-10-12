@@ -20,6 +20,7 @@ export default {
       ws.send('{"jsonrpc":"2.0","id":"' + id + '","method":"' + method + '","params":null}');
     } else {
       let jsonrpc = '{"jsonrpc":"2.0","id":"' + id + '","method":"' + method + '","params":' + params + '}';
+      console.log(jsonrpc);
       ws.send(jsonrpc);
     }
   }
