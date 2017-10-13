@@ -12,7 +12,9 @@
         </div>  
         <ul class="channel-list">
           <li @click="selectChannel(ch)" class="channel-item" v-for="ch in channels">
-            > {{ shortLabel(ch) }}
+            <img class="conn-icon" src="/img/asym.png" v-if="ch.asym" />
+            <img class="conn-icon" src="/img/sym.png" v-else />
+             {{ shortLabel(ch.remote) }}
           </li>
         </ul>
         <div class="add-peer-section">
@@ -50,9 +52,28 @@
 
     </div>
     <div class="add-peer-dialog" v-if="addingPeer">
-      <label class="full dialog-elem" v-if="asym">Enter the peer's public key</label>
-      <label class="full dialog-elem" v-else>Enter the symmetric key for your peer's connection</label>
-      <input class="full dialog-elem" type="text" v-model="remoteKey" />
+      <label class="peer-config-label title" for="asym">Encryption:</label>
+        <label class="inline hide-checkbox">
+          <input type="checkbox" v-model="asym" />Asymmetric
+          <span></span>
+      </label>
+      <div class="asym-config" v-if="asym">
+        <label class="full dialog-elem">Enter the peer's public key</label>
+        <input class="full dialog-elem" type="text" v-model="remoteKey" />
+      </div>
+      <div class="sym-config" v-else>
+        <div class="std-label">Generate Symmetric Key: </div>
+        <div class="enc-config-value">
+          <button class="small-action" @click="updateSymKey">Generate</button>
+        </div>
+        <div class="full dialog-elem">
+          Symmetric key ID:
+        </div>
+        <input type="text" class="full dialog-elem" v-model="remoteKey"/>
+  <!--
+			  <symmetric-key-config @update-sym-key="updateSymKey" :sym-key-id="remoteKey"></symmetric-key-config>
+-->
+      </div>
       <label class="full dialog-elem">Enter the peer's overlay address</label>
       <input class="full dialog-elem" type="text" v-model="remoteAddr" />
       <button class="action" v-if="remoteKey && remoteAddr" @click="registerPeer">Add</button>
@@ -63,11 +84,9 @@
 
 <script>
 import PssService from './PssService';
+import SymmetricKeyConfig from './SymmetricKeyConfig.vue';
 import {decodeFromHex, encodeToHex, string2Bin} from './hexutils';
 import Base64 from './base64js.min';
-
-const defaultRecipientPubKey = "0x04ffb2647c10767095de83d45c7c0f780e483fb2221a1431cb97a5c61becd3c22938abfe83dd6706fc1154485b80bc8fcd94aea61bf19dd3206f37d55191b9a9c4";
-const defaultTopic = "0x5a4ea131";
 
 var cnt = 0;
 
@@ -83,8 +102,6 @@ export default {
 			sympw: "",
 			asym: true,
 			configured: false,
-			topic: defaultTopic,
-			recipientPubKey: defaultRecipientPubKey,
 			asymPubKey: "",
       channels: [],
       selectedChannel: false,
@@ -101,7 +118,7 @@ export default {
 		return data;
 	},
 
-	components: {},
+	components: {SymmetricKeyConfig},
 
   created: function() {
     var self = this;
@@ -119,7 +136,10 @@ export default {
       self.setMessageRead(result);
     });
     this.$root.$on("pss_setPeerPublicKey_received", function(result) {
-      self.doAddPeer(result);
+      self.doAddPeer(result, true);
+    });
+    this.$root.$on("pss_setSymmetricKey_received", function(result) {
+      self.doAddPeer(result, false);
     });
     this.$root.$on("pss_message_received", function(result) {
       self.messageReceived(result);
@@ -127,6 +147,11 @@ export default {
   },
 
 	methods: {
+
+		updateSymKey(sympw) {
+      this.symKeyId = toHexString(generateSymKey()); 
+      this.remoteKey = this.symKeyId;
+		},
 
     setMessageRead(result) {
       let id = parseInt(result);
@@ -168,11 +193,25 @@ export default {
         alert("Please enter a valid peer address!")
         return;
       }
-      PssService.send("pss_setPeerPublicKey","pss_setPeerPublicKey",'[[' + Base64.toByteArray(new Buffer(this.remoteKey, "hex").toString('base64')) + '],"' + this.topics[0].value + '",[' + Base64.toByteArray(new Buffer(this.remoteAddr, "hex").toString('base64')) + ']]');
+      if (this.asym) {
+        PssService.send("pss_setPeerPublicKey","pss_setPeerPublicKey",'[[' + Base64.toByteArray(new Buffer(this.remoteKey, "hex").toString('base64')) + '],"' + this.topics[0].value + '",[' + Base64.toByteArray(new Buffer(this.remoteAddr, "hex").toString('base64')) + ']]');
+      } else {
+        PssService.send("pss_setSymmetricKey","pss_setSymmetricKey",'[[' + Base64.toByteArray(new Buffer(this.remoteKey, "hex").toString('base64')) + '],"' + this.topics[0].value + '",[' + Base64.toByteArray(new Buffer(this.remoteAddr, "hex").toString('base64')) + '], true]');
+      }
     },
 
-    doAddPeer() {
-      this.channels.push(this.remoteAddr);
+    doAddPeer(result, asym) {
+      let newch = {};
+      if (asym) {
+        newch.remote = this.remoteAddr;
+        newch.remoteKey = this.remoteKey;
+        newch.asym = true;
+      } else {
+        newch.remote = this.remoteAddr;
+        newch.remoteKey = result;
+        newch.asym = false;
+      }
+      this.channels.push(newch);
       if (this.channels.length == 1) {
         this.selectChannel(this.channels[0]);
       }       
@@ -225,11 +264,27 @@ export default {
 			this.messages.push(msg);
 
 			if (this.asym) {
-        PssService.send("pss_sendAsym" + cnt++, "pss_sendAsym", '["0x' + this.remoteKey + '","' + this.topics[0].value + '",[' + string2Bin(msg.text) + ']]');
+        PssService.send("pss_sendAsym" + cnt++, "pss_sendAsym", '["0x' + this.selectedChannel.remoteKey + '","' + this.topics[0].value + '",[' + string2Bin(msg.text) + ']]');
 			} else {
-        PssService.send("pss_sendSym" + cnt++, "pss_sendSym", '["0x' + this.selectedChannel + '","' + this.topics[0].value + '",[' + string2Bin(msg.text) + ']]');
+        PssService.send("pss_sendSym" + cnt++, "pss_sendSym", '["' + this.selectedChannel.remoteKey + '","' + this.topics[0].value + '",[' + string2Bin(msg.text) + ']]');
       }
 		}
 	}
 };
+
+function generateSymKey() {
+	var a = new Uint8Array(32);
+	for (let i = 0; i < 32; i++) {
+		a[i] = Math.floor(Math.random() * 255);
+	}
+  return a;
+};
+
+// cheekily borrowed from https://stackoverflow.com/questions/34309988/byte-array-to-hex-string-conversion-in-javascript
+function toHexString(byteArray) {
+  return Array.from(byteArray, function(byte) {
+    return ('0' + (byte & 0xFF).toString(16)).slice(-2);
+  }).join('');
+}
+
 </script>

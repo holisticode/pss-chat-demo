@@ -1,15 +1,21 @@
 <template>
 	<div class="demo-setup">
 		<h1>PSS Demo Chat Setup</h1>
+    <label class="config-label">Your configuration parameters: </label>
 		<div class="demo-config" v-if="!configured">
       <div class="enc-config">
+        <!--
         <label class="enc-config-label title" for="asym">Encryption:</label>
           <label class="inline hide-checkbox">
 			      <input type="checkbox" v-model="asym" />Asymmetric
             <span></span>
           </label>
+        -->
+			    <asymmetric-key-config :pub-key="asymPubKey" :key-id="asymKeyId"></asymmetric-key-config>
+        <!--
 			    <asymmetric-key-config v-if="asym" :pub-key="asymPubKey" :key-id="asymKeyId"></asymmetric-key-config>
 			    <symmetric-key-config v-else @update-sym-key="updateSymKey" :sym-key-id="symKeyId"></symmetric-key-config>
+        -->
       </div>
 
       <div id="username" class="enc-config-option inline">
@@ -43,10 +49,6 @@ import SymmetricKeyConfig from './SymmetricKeyConfig.vue';
 import AsymmetricKeyConfig from './AsymmetricKeyConfig.vue';
 import {decodeFromHex, encodeToHex} from './hexutils';
 
-const defaultRecipientPubKey = "0x04ffb2647c10767095de83d45c7c0f780e483fb2221a1431cb97a5c61becd3c22938abfe83dd6706fc1154485b80bc8fcd94aea61bf19dd3206f37d55191b9a9c4";
-const defaultTopic = "0x5a4ea131";
-
-
 var base64local = null;
 var symkey = false;
 
@@ -64,8 +66,6 @@ export default {
 			sympw: "",
 			asym: true,
 			configured: false,
-			topic: defaultTopic,
-			recipientPubKey: defaultRecipientPubKey,
 			asymPubKey: ""
 		};
 
@@ -117,10 +117,6 @@ export default {
 			this.text = "";
 		},
 
-		updateSymKey(sympw) {
-      this.symKeyId = toHexString(generateSymKey()); 
-		},
-
 		configWithKey() {
 			// TODO use a form
 			if (!this.name || this.name.length == 0) {
@@ -150,20 +146,5 @@ export default {
 		}
 	}
 };
-
-function generateSymKey() {
-	var a = new Uint8Array(32);
-	for (let i = 0; i < 32; i++) {
-		a[i] = Math.floor(Math.random() * 255);
-	}
-  return a;
-};
-
-// cheekily borrowed from https://stackoverflow.com/questions/34309988/byte-array-to-hex-string-conversion-in-javascript
-function toHexString(byteArray) {
-  return Array.from(byteArray, function(byte) {
-    return ('0' + (byte & 0xFF).toString(16)).slice(-2);
-  }).join('');
-}
 
 </script>

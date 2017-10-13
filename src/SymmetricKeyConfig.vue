@@ -1,19 +1,17 @@
 <template>
 	<div class="enc-config-option">
-    <div class="enc-config-label">
+    <div class="std-label">
 		  Generate Symmetric Key: 
     </div>
     <div class="enc-config-value">
-			<button class="action" @click="updateKey">Generate</button>
+			<button class="small-action" @click="updateKey">Generate</button>
     </div>
     <br/>
     <br/>
-    <div class="enc-config-label">
+    <div class="full dialog-elem">
 		  Symmetric key ID:
     </div>
-    <div class="enc-config-value">
-      {{symKeyId || "Click button above to generate the key"}}
-    </div>
+    <input type="text" class="full dialog-elem" v-model="symKeyId"/>
 	</div>
 </template>
 

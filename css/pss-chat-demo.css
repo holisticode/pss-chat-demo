@@ -149,6 +149,27 @@ header {
   margin: 10px 0;
 }
 
+.std-label {
+  display: inline-block;
+  margin-right: 10px;
+}
+
+.peer-config-label {
+  margin-right: 20px;
+  font-size: 1.5em;
+  font-weight: bold;
+  color: #f0f8ff;
+}
+
+.config-label {
+  display: block;
+  margin-bottom: 20px;
+  font-size: 1.5em;
+  font-weight: bold;
+  color: #f0f8ff;
+  text-align: center;
+}
+
 .enc-config-label
 {
   width: 250px;
@@ -193,6 +214,10 @@ button {
 
 .action {
   width: 160px;
+}
+
+.small-action {
+  padding: 4px 10px;
 }
 
 button.cancel {
@@ -261,4 +286,17 @@ label.hide-checkbox span {/* <-- style the artificial checkbox */
 .msg-remote {
   color: white;
   background-color: #f69047;
+}
+
+.asym-config {
+  margin-top: 40px;
+}
+
+.sym-config {
+  margin-top: 40px;
+}
+
+.conn-icon {
+  width: 32px;
+  border: none;
 }

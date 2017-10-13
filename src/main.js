@@ -56,7 +56,7 @@ PssService.ws.onmessage =  function(m) {
   }
 
   if (msg.id.indexOf("pss_sendSym") == 0) {
-    let id = msg.id.substr("pss_sendAsym".length);
+    let id = msg.id.substr("pss_sendSym".length);
     app.$emit("msg_send_confirmed", id);
     return;
   }
@@ -80,6 +80,10 @@ PssService.ws.onmessage =  function(m) {
       case "pss_setPeerPublicKey":
         console.log("emit pss_setPeerPublicKey_received");
         app.$emit("pss_setPeerPublicKey_received", msg.result);
+        break;
+      case "pss_setSymmetricKey":
+        console.log("emit pss_setSymmetricKey_received");
+        app.$emit("pss_setSymmetricKey_received", msg.result);
         break;
       case "pss_subscribe":
         console.log("emit pss_subscribe_received");
